@@ -1,7 +1,7 @@
 import random
 
 class NeuralNetwork:
-    def __init__(self, layerDescriptor):
+    def __init__(self, layerDescriptor, init_min=-1., init_max=1.):
         self.layerDescriptor = layerDescriptor
         self.layers = []
 
@@ -9,7 +9,8 @@ class NeuralNetwork:
             layer = []
             nbWeights = layerDescriptor[currentLayer] + 1 # + 1 for the bias
             for neuron in range(layerDescriptor[currentLayer + 1]):
-                layer.append([random.uniform(-1, 1) for i in range(nbWeights)])
+                layer.append([random.uniform(init_min, init_max) for i in \
+                              range(nbWeights)])
             self.layers.append(layer)
 
     def activate(self, entries):
