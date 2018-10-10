@@ -24,25 +24,25 @@ class GomokuEnv:
 
         return out
 
-    def step(self, player, action):
+    def step(self, currentPlayer, advers, action):
         y = int(action / self.size)
         x = int(action) % self.size
-        reward = 0.
+        rewardCurrent = 0.
+        rewardAdvers = 0.
         done = False
 
-        if self.board.play(player, x, y) == False:
-            reward = -1.
-            done = True
-        elif self.board.playerHaveWin(player):
-            reward = 1.
-            done = True
-        elif self.board.isFull():
-            reward = 0.
+        playResult = self.board.play(currentPlayer, x, y)
+        nbMaxAlignedCurrent = self.board.getNbMaxAligned(currentPlayer)
+
+        if playResult == False or nbMaxAlignedCurrent >= 5 or \
+           self.board.isFull():
+            rewardCurrent = nbMaxAlignedCurrent
+            rewardAdvers = self.board.getNbMaxAligned(advers)
             done = True
 
         obs = self.board.getRawBoard()
 
-        return self._rawBoardToBatch(obs), reward, done
+        return self._rawBoardToBatch(obs), rewardCurrent, rewardAdvers, done
 
     def render(self):
         raw = self.board.getRawBoard()
