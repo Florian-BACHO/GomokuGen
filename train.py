@@ -115,12 +115,15 @@ if __name__ == "__main__":
     summary_writer = tf.summary.FileWriter(LOG_DIR)
     loss_placeholder = tf.placeholder(tf.float32, ())
     loss_summary = tf.summary.scalar("Loss", loss_placeholder)
+    eval_placeholder = tf.placeholder(tf.float32, ())
+    eval_summary = tf.summary.scalar("Evaluation", eval_placeholder)
 
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
         sess.run(init)
         epoch = 0
+        eval_idx = 0
         while True:
             epoch += 1
             file = getRandomFile()
@@ -134,7 +137,10 @@ if __name__ == "__main__":
             summary_writer.add_summary(sum, epoch)
 
             if epoch % TEST_EVERY_EPOCH == 0:
+                eval_idx += 1
                 result = eval(ann, best)
+                sum = sess.run(eval_summary, feed_dict={eval_placeholder: result})
+                summary_writer.add_summary(sum, eval_idx)
                 print("EVALUATION: %f win against the last best ann" % (result))
                 if result >= UPDATE_THRESHOLD:
                     best.assign(ann)
