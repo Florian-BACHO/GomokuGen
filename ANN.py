@@ -1,7 +1,7 @@
 import tensorflow as tf
 import game
 
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 
 class ANN:
     def __init__(self, scope=""):

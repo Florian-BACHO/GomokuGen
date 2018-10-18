@@ -1,35 +1,45 @@
 import tensorflow as tf
+import numpy as np
+from ANN import *
+
+SCOPE = "Best_ANN"
+LAYERS = ["layer1", "layer2", "layer3", "layer4", "out"]
 
 def getTensorWeights(tensor):
     name = tensor.name.split('/')[0]
 
-x = tf.placeholder(tf.float32, [None, 2, 2, 2])
-conv1 = tf.layers.conv2d(x, 5, 3, padding="same", name="conv1")
-
-kernel = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'conv1/kernel')[0]
-bias = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'conv1/bias')[0]
-
-init = tf.global_variables_initializer()
-
-with tf.Session() as sess:
-    sess.run(init)
-
-    res = sess.run(conv1, feed_dict={x: [[[[1, 0], [0, 0]],
-                                          [[0, 0], [0, 0]]]]})
-
-    print(res)
+def getKernelAndBias(sess, layerName):
+    kernel = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, layerName + '/kernel')[0]
+    bias = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, layerName + '/bias')[0]
 
     k, b = sess.run([kernel, bias])
-    print(k)
-    file = open("out.model", "w")
+    return k, b
 
-    for row in k:
+def writeKernelAndBias(file, kernel, bias):
+    for row in kernel:
         for col in row:
             for chan in col:
                 for filter in chan:
                     file.write(str(filter) + "\n")
 
-    for bia in b:
-        file.write(str(bia) + "\n")
+    for b in bias:
+        file.write(str(b) + "\n")
+
+ann = ANN(SCOPE)
+
+saver = tf.train.Saver()
+
+with tf.Session() as sess:
+    saver.restore(sess, "save/model.ckpt")
+
+    res = ann(np.zeros((1, 20, 20, 2)))
+    print(res)
+
+    file = open("out.model", "w")
+
+    for name in LAYERS:
+        kernel, bias = getKernelAndBias(sess, SCOPE + "/" + name)
+        print(len(kernel))
+        writeKernelAndBias(file, kernel, bias)
 
     file.close()
