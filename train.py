@@ -5,14 +5,20 @@ import os
 import random
 import game
 from ANN import *
+from ReplayBuffer import *
 
 DATA_DIRS = ["data/2016/freestyle1/", "data/2016/freestyle2/", "data/2016/freestyle3/", \
              "data/2017/freestyle1/", "data/2017/freestyle2/", "data/2017/freestyle3/"]
 LOG_DIR = "logs/"
 TEST_EVERY_EPOCH = 1000
+LOSS_SUMMARY_EPOCH = 10
 DUMP_EPOCH = 100
 NB_FIGHT_EVAL = 100
-UPDATE_THRESHOLD = 0.6
+UPDATE_THRESHOLD = 0.5
+SAVE_FILE = "save/model.ckpt"
+REPLAY_SIZE = 100
+START_TRAINING = 100
+BATCH_SIZE = 32
 
 def loadDataFiles(dirs):
     out = []
@@ -111,12 +117,24 @@ if __name__ == "__main__":
 
     ann = ANN("Main_ANN")
     best = ANN("Best_ANN")
+    replay = ReplayBuffer(REPLAY_SIZE)
+
+    while len(replay) < START_TRAINING:
+        file = getRandomFile()
+        try:
+            entries, outs = load(file)
+            replay.extend(list(zip(entries, outs)))
+        except ValueError:
+            print("Invalid file:", file)
+            continue
 
     summary_writer = tf.summary.FileWriter(LOG_DIR)
     loss_placeholder = tf.placeholder(tf.float32, ())
     loss_summary = tf.summary.scalar("Loss", loss_placeholder)
     eval_placeholder = tf.placeholder(tf.float32, ())
     eval_summary = tf.summary.scalar("Evaluation", eval_placeholder)
+
+    saver = tf.train.Saver()
 
     init = tf.global_variables_initializer()
 
@@ -126,15 +144,19 @@ if __name__ == "__main__":
         eval_idx = 0
         while True:
             epoch += 1
+
             file = getRandomFile()
             try:
                 entries, outs = load(file)
+                replay.extend(list(zip(entries, outs)))
             except ValueError:
                 print("Invalid file:", file)
                 continue
+
+            sample = replay(BATCH_SIZE)
+            entries, outs = zip(*sample)
+
             loss = ann.train(entries, outs)
-            sum = sess.run(loss_summary, feed_dict={loss_placeholder: loss})
-            summary_writer.add_summary(sum, epoch)
 
             if epoch % TEST_EVERY_EPOCH == 0:
                 eval_idx += 1
@@ -142,9 +164,14 @@ if __name__ == "__main__":
                 sum = sess.run(eval_summary, feed_dict={eval_placeholder: result})
                 summary_writer.add_summary(sum, eval_idx)
                 print("EVALUATION: %f win against the last best ann" % (result))
-                if result >= UPDATE_THRESHOLD:
+                if result > UPDATE_THRESHOLD:
                     best.assign(ann)
                     print("The current ann become the best one")
+                    saver.save(sess, SAVE_FILE)
+
+            if epoch % LOSS_SUMMARY_EPOCH == 0:
+                sum = sess.run(loss_summary, feed_dict={loss_placeholder: loss})
+                summary_writer.add_summary(sum, epoch)
 
             if epoch % DUMP_EPOCH == 0:
                 print("%d: Loss: %f" % (epoch, loss))

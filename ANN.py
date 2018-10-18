@@ -1,7 +1,7 @@
 import tensorflow as tf
 import game
 
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.01
 
 class ANN:
     def __init__(self, scope=""):
@@ -12,11 +12,16 @@ class ANN:
 
     def _create_ann(self):
         self.x = tf.placeholder(tf.float32, (None, game.BOARD_SIZE, game.BOARD_SIZE, 2))
-        layer1 = tf.layers.conv2d(self.x, 4, 5, padding="same", activation=tf.nn.selu)
-        layer2 = tf.layers.conv2d(layer1, 4, 5, padding="same", activation=tf.nn.selu)
-        layer3 = tf.layers.conv2d(layer2, 8, 3, padding="same", activation=tf.nn.selu)
-        layer4 = tf.layers.conv2d(layer3, 8, 3, padding="same", activation=tf.nn.selu)
-        out = tf.layers.conv2d(layer4, 1, 1, padding="same", activation=tf.nn.selu)
+        layer1 = tf.layers.conv2d(self.x, 4, 5, padding="same", activation=tf.nn.selu, \
+                                  name="layer1")
+        layer2 = tf.layers.conv2d(layer1, 4, 5, padding="same", activation=tf.nn.selu, \
+                                  name="layer2")
+        layer3 = tf.layers.conv2d(layer2, 8, 3, padding="same", activation=tf.nn.selu, \
+                                  name="layer3")
+        layer4 = tf.layers.conv2d(layer3, 8, 3, padding="same", activation=tf.nn.selu, \
+                                  name="layer4")
+        out = tf.layers.conv2d(layer4, 1, 1, padding="same", activation=tf.nn.selu, \
+                                  name="out")
         self.out_flat = tf.contrib.layers.flatten(out)
 
         self.expected_y = tf.placeholder(tf.int32, (None))
