@@ -9,6 +9,7 @@
 #include <fstream>
 #include <cmath>
 #include "NeuralNetwork/Convolution2D.hpp"
+#include "GameManager.hpp"
 
 template <typename T>
 inline T elu(T x, T alpha=1.67326)
@@ -46,12 +47,16 @@ int main()
 	res = layer4(res);
 	res = out(res);
 
-	std::cout << selu(-1.0f) << std::endl;
+/*	std::cout << selu(-1.0f) << std::endl;
 	for (const auto &row : res) {
 		for (const auto &col : row)
 			for (const auto &chan : col)
 				std::cout << chan << " ";
 		std::cout << std::endl;
-	}
+		}*/
+
+	Gomoku::GameManager manager;
+
+	manager.launchGame();
 	return (0);
 }

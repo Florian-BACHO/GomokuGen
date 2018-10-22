@@ -5,7 +5,7 @@
 ## Makefile
 ##
 
-CXX		=	g++
+CXX		=	mingw32-g++
 RM		=	rm -rf
 
 # Sources
@@ -14,12 +14,13 @@ SRCS		=	src/Main.cpp
 OBJS		= 	$(SRCS:.cpp=.o)
 
 # Compile Flags, Include Paths and Library Paths
-CXXFLAGS	= 	-Wall -Wextra -Werror -W -std=c++17 -Ofast -g3
+CXXFLAGS	= 	-Wall -Wextra -Werror -W -std=c++17 -Ofast
 CPPFLAGS 	=	-I ./inc
+LDFLAGS		=	-static-libstdc++
 
 # Binary names
 
-NAME 		=	gomoku
+NAME 		=	gomoku.exe
 
 # ==========================================================================
 
