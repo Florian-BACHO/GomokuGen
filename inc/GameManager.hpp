@@ -7,28 +7,78 @@
 
 #pragma once
 
+#include <cstdlib>
+#include "NeuralNetwork/ANNPlayer.hpp"
 #include "AGameCommunication.hpp"
 
 namespace Gomoku {
 	class GameManager;
+
+	using Board = std::vector<std::vector<std::vector<float>>>;
 };
 
 class Gomoku::GameManager : Gomoku::AGameCommunication {
 public:
 	GameManager()
-		: AGameCommunication() {}
+		: AGameCommunication(), _player("ai.model") {}
 
 	void launchGame() {
 		while (true)
 			(*this)();
 	}
 
-	bool start(uint32_t size) override {
-		_board = getZerosMatrix<float>(size, size, 2);
-		return true;
+	void start(uint32_t size) override {
+		_size = size;
+		resetBoard();
+		std::cout << "OK" << std:endl;
 	}
 
-	bool turn(uint32_t x, uint32_t y) override {
-		return true;
+	void turn(uint32_t x, uint32_t y) override {
+		NeuralNetwork::PossibleActions possibleActions;
+		std::pair<uint32_t, uint32_t> action;
+
+		_board[y][x][1] = 1.0f;
+		possibleActions = getPossibleActions();
+		action = _player(_board, possibleActions);
+		_board[action.second][action.first] = 1.0f;
+		std::cout << action.first << "," << action.second << std::endl;
 	}
+
+	void resetBoard() override {
+		_board = getZerosMatrix<float>(_size, _size, 2);
+	}
+
+	void board(uint32_t x, uint32_t y, uint32_t player) override {
+		_board[y][x][player] = 1.0f;
+	}
+
+	void info(const std::vector<std::string> &) override {}
+
+	void end() override {
+		std::exit(0);
+	}
+
+	void about() override {
+		std::cout << "name=\"ConvANN\", version=\"1.0\", " +
+			"author=\"Nymand\", ""country=\"USA\"" << std::endl;
+	}
+
+private:
+	NeuralNetwork::PossibleActions getPossibleActions() const noexcept {
+		std::vector<std::pair<uint32_t, uint32_t>> out;
+		auto height = _size;
+		auto width = _size;
+
+		for (auto y = 0u; y < height; y++)
+			for (auto x = 0u; x < width; x++)
+				if (_board[y][x][0] == 0.0f &&
+				    _board[y][x][1] == 0.0f)
+					out.push_back(std::make_pair(x, y));
+		return (out);
+	}
+
+private:
+	Board _board;
+	uint32_t size;
+	NeuralNetwork::ANNPlayer _player;
 };
