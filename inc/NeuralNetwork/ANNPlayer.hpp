@@ -10,6 +10,7 @@
 #include <vector>
 #include <utility>
 #include <fstream>
+#include <windows.h>
 #include "NeuralNetwork/Convolution2D.hpp"
 
 namespace NeuralNetwork {
@@ -23,15 +24,17 @@ template <typename T>
 class NeuralNetwork::ANNPlayer {
 public:
 	ANNPlayer(const std::string &modelFile)
-		: _file(modelFile, std::ios::in),
+		: _file(ExePath() + "\\" + modelFile, std::ios::in),
 		  _layer1(_file, 2, 4, 5, 2, [this](float x) {return selu(x);}),
 		  _layer2(_file, 4, 4, 5, 2, [this](float x) {return selu(x);}),
 		  _layer3(_file, 4, 8, 3, 1, [this](float x) {return selu(x);}),
 		  _layer4(_file, 8, 8, 3, 1, [this](float x) {return selu(x);}),
 		  _out(_file, 8, 1, 1, 0, [this](float x) {return selu(x);})
 		{
-			if (!_file.is_open())
+		if (!_file.is_open()) {
+				std::cout << ExePath() + "\\" + modelFile << std::endl;
 				std::exit(0);
+			}
 			_file.close();
 		};
 
@@ -48,6 +51,13 @@ public:
 	}
 
 private:
+	std::string ExePath() {
+		char buffer[MAX_PATH];
+		GetModuleFileName(NULL, buffer, MAX_PATH);
+		std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+		return std::string(buffer).substr(0, pos);
+	}
+
 	inline T elu(T x, T alpha=1.67326) const noexcept {
 		return (x < T() ? (alpha * (std::exp(x) - 1)) : x);
 	}

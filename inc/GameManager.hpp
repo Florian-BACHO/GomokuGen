@@ -23,7 +23,7 @@ namespace Gomoku {
 class Gomoku::GameManager : Gomoku::AGameCommunication {
 public:
 	GameManager()
-		: AGameCommunication(), _player("ai.model") {}
+		: AGameCommunication(), _player("ann.model") {}
 
 	void launchGame() {
 		while (true)

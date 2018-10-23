@@ -95,7 +95,7 @@ private:
 		std::vector<std::string> parsed;
 
 		split(vec[0], parsed, ',');
-		turn(std::atoi(parsed[0].c_str()), std::atoi(parsed[0].c_str()));
+		turn(std::atoi(parsed[0].c_str()), std::atoi(parsed[1].c_str()));
 	}
 
 	void handleBoard(const std::vector<std::string> &vec) {
