@@ -19,6 +19,7 @@ namespace NeuralNetwork {
 	using PossibleActions = std::vector<std::pair<uint32_t, uint32_t>>;
 };
 
+template <typename T>
 class NeuralNetwork::ANNPlayer {
 public:
 	ANNPlayer(const std::string &modelFile)
@@ -85,9 +86,9 @@ private:
 private:
 	std::ifstream _file;
 
-	NeuralNetwork::Convolution2D<float> _layer1;
-	NeuralNetwork::Convolution2D<float> _layer2;
-	NeuralNetwork::Convolution2D<float> _layer3;
-	NeuralNetwork::Convolution2D<float> _layer4;
-	NeuralNetwork::Convolution2D<float> _out;
+	NeuralNetwork::Convolution2D<T> _layer1;
+	NeuralNetwork::Convolution2D<T> _layer2;
+	NeuralNetwork::Convolution2D<T> _layer3;
+	NeuralNetwork::Convolution2D<T> _layer4;
+	NeuralNetwork::Convolution2D<T> _out;
 };

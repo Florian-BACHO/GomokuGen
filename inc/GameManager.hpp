@@ -80,5 +80,5 @@ private:
 private:
 	Board _board;
 	uint32_t size;
-	NeuralNetwork::ANNPlayer _player;
+	NeuralNetwork::ANNPlayer<float> _player;
 };
