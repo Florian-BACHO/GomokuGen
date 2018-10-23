@@ -31,7 +31,9 @@ public:
 		_handlers["INFO"] = [this](const std::vector<std::string> &params)
 			{handleInfo(params);};
 		_handlers["ABOUT"] = [this](const std::vector<std::string> &params)
-			{handleEnd(params);};
+			{handleEnd(params); };
+		_handlers["BEGIN"] = [this](const std::vector<std::string> &params)
+			{handleBegin(params); };
 	}
 
 	void operator()() {
@@ -47,6 +49,7 @@ public:
 	virtual void info(const std::vector<std::string> &params) = 0;
 	virtual void end() = 0;
 	virtual void about() = 0;
+	virtual void begin() = 0;
 
 private:
 	inline std::string readLine() const noexcept {
@@ -125,6 +128,10 @@ private:
 
 	void handleAbout(const std::vector<std::string> &) {
 		about();
+	}
+
+	void handleBegin(const std::vector<std::string> &) {
+		begin();
 	}
 
 private:

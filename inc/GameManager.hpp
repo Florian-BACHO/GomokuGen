@@ -11,6 +11,8 @@
 #include <vector>
 #include <cstdlib>
 #include <Windows.h>
+#include <random>
+#include <ctime>
 #include "NeuralNetwork/ANNPlayer.hpp"
 #include "AGameCommunication.hpp"
 
@@ -40,6 +42,8 @@ public:
 		NeuralNetwork::PossibleActions possibleActions;
 		std::pair<uint32_t, uint32_t> action;
 
+		if (checkComplete())
+			return;
 		_board[y][x][1] = 1.0f;
 		possibleActions = getPossibleActions();
 		action = _player(_board, possibleActions);
@@ -66,7 +70,22 @@ public:
 			"author=\"Nymand\", \"country=\"USA\"" << std::endl;
 	}
 
+	void begin() override {
+		auto x = randint(0, _size - 1);
+		auto y = randint(0, _size - 1);
+
+		_board[y][x][0] = 1.0f;
+		std::cout << x << "," << y << std::endl;
+	}
+
 private:
+	inline uint32_t randint(uint32_t min, uint32_t max) {
+		std::mt19937 rng(static_cast<unsigned int>(std::time(nullptr)));
+		std::uniform_int_distribution<uint32_t> gen(min, max);
+
+		return (gen(rng));
+	}
+
 	NeuralNetwork::PossibleActions getPossibleActions() const noexcept {
 		std::vector<std::pair<uint32_t, uint32_t>> out;
 		auto height = _size;
@@ -86,6 +105,85 @@ private:
 		std::vector<T> zeroChannel(channel, 0.0f);
 		std::vector<std::vector<T>> zeroRow(width, zeroChannel);
 		return (NeuralNetwork::Conv2DMatrix<T>(height, zeroRow));
+	}
+
+	bool playIfEmpty(uint32_t x, uint32_t y) const noexcept{
+		if (x >= _size || y >= _size || _board[y][x][0] == 1.0f || 
+			_board[y][x][1] == 1.0f)
+			return false;
+		std::cout << x << "," << y << std::endl;
+		return true;
+	}
+
+	bool checkComplete() const noexcept {
+		for (auto y = 0u; y < _size; y++)
+			for (auto x = 0u; x < _size; x++)
+				if (checkVertical(x, y) ||
+					checkHorizontal(x, y) ||
+					checkDiagLeft(x, y) ||
+					checkDiagRight(x, y))
+					return true;
+		return false;
+	}
+
+	bool checkVertical(uint32_t x, uint32_t y) const noexcept {
+		uint32_t counter = 0;
+
+		for (auto y2 = y; y2 < y + 5; y2++) {
+			if (y2 >= _size || _board[y2][x][0] != 1.0f)
+				break;
+			counter++;
+		}
+		if (counter == 5)
+			return (playIfEmpty(x, y -  1) ||
+					playIfEmpty(x, y + 4));
+		return false;
+	}
+
+	bool checkHorizontal(uint32_t x, uint32_t y) const noexcept {
+		uint32_t counter = 0;
+
+		for (auto x2 = x; x2 < x + 5; x2++) {
+			if (x2 >= _size || _board[y][x2][0] != 1.0f)
+				break;
+			counter++;
+		}
+		if (counter == 5)
+			return (playIfEmpty(x - 1, y) ||
+				playIfEmpty(x + 4, y));
+		return false;
+	}
+
+	bool checkDiagRight(uint32_t x, uint32_t y) const noexcept {
+		uint32_t counter = 0;
+		auto y2 = y;
+
+		for (auto x2 = x; x2 < x + 5; x2++) {
+			if (x2 >= _size || y2 >= _size ||_board[y2][x2][0] != 1.0f)
+				break;
+			counter++;
+			y2--;
+		}
+		if (counter == 5)
+			return (playIfEmpty(x + 4, y - 1) ||
+				playIfEmpty(x - 1, y + 4));
+		return false;
+	}
+
+	bool checkDiagLeft(uint32_t x, uint32_t y) const noexcept {
+		uint32_t counter = 0;
+		auto y2 = y;
+
+		for (auto x2 = x; x2 < x + 5; x2++) {
+			if (x2 >= _size || y2 >= _size || _board[y2][x2][0] != 1.0f)
+				break;
+			counter++;
+			y2++;
+		}
+		if (counter == 5)
+			return (playIfEmpty(x - 1, y - 1) ||
+				playIfEmpty(x + 4, y + 4));
+		return false;
 	}
 
 private:
