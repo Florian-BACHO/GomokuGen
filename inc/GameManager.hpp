@@ -23,8 +23,12 @@ public:
 			(*this)();
 	}
 
-	bool start(uint32_t, uint32_t) override {
-		std::cerr << "Called start" << std::endl;
+	bool start(uint32_t size) override {
+		_board = getZerosMatrix<float>(size, size, 2);
+		return true;
+	}
+
+	bool turn(uint32_t x, uint32_t y) override {
 		return true;
 	}
 };

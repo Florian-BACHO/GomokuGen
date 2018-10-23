@@ -31,8 +31,13 @@ NeuralNetwork::Conv2DMatrix<T> getZerosMatrix(uint32_t width, uint32_t height,
 	return (NeuralNetwork::Conv2DMatrix<T>(height, zeroRow));
 }
 
+#ifdef  _WIN32
+int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+	PSTR lpCmdLine, INT nCmdShow) {
+#else
 int main()
 {
+#endif
 	std::ifstream file("out.model", std::ios::in);
 	NeuralNetwork::Convolution2D<float> layer1(file, 2, 4, 5, 2, [](float x){return selu(x);});
 	NeuralNetwork::Convolution2D<float> layer2(file, 4, 4, 5, 2, [](float x){return selu(x);});

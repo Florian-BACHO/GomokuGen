@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <windows.h>
 
 namespace Gomoku {
 	class AGameCommunication;
@@ -31,12 +32,12 @@ public:
 		handleCommand(line);
 	}
 
-	virtual bool start(uint32_t width, uint32_t height) = 0;
+	virtual bool start(uint32_t size) = 0;
 
 protected:
 	Board _board;
 
-private:
+protected:
 	inline std::string readLine() const noexcept {
 		std::string out;
 
@@ -44,6 +45,7 @@ private:
 		return out;
 	}
 
+private:
 	size_t split(const std::string &txt, std::vector<std::string> &strs,
 		     char ch) const noexcept {
 		auto pos = txt.find(ch);
@@ -56,7 +58,7 @@ private:
 
 			pos = txt.find( ch, initialPos );
 		}
-		strs.push_back(txt.substr(initialPos, std::min(pos, txt.size())
+		strs.push_back(txt.substr(initialPos, min(pos, txt.size())
 					  - initialPos + 1 ));
 
 		return strs.size();
@@ -75,8 +77,8 @@ private:
 		_handlers[cmd](parsed);
 	}
 
-	void handleStart(const std::vector<std::string> &) {
-	        start(0, 0);
+	void handleStart(const std::vector<std::string> &vec) {
+		start(std::atoi(vec[0].c_str));
 	}
 
 private:
