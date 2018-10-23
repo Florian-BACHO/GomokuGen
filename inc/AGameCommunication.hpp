@@ -88,14 +88,14 @@ private:
 	}
 
 	void handleStart(const std::vector<std::string> &vec) {
-		start(std::atoi(vec[0].c_str));
+		start(std::atoi(vec[0].c_str()));
 	}
 
 	void handleTurn(const std::vector<std::string> &vec) {
 		std::vector<std::string> parsed;
 
 		split(vec[0], parsed, ',');
-		turn(std::atoi(parsed[0].c_str), std::atoi(parsed[0].c_str));
+		turn(std::atoi(parsed[0].c_str()), std::atoi(parsed[0].c_str()));
 	}
 
 	void handleBoard(const std::vector<std::string> &vec) {
@@ -108,9 +108,9 @@ private:
 		resetBoard();
 		while (line != "DONE") {
 			split(line, parsed, ',');
-			x = std::atoi(parsed[0].c_str);
-			y = std::atoi(parsed[1].c_str);
-			player = std::atoi(parsed[2].c_str);
+			x = std::atoi(parsed[0].c_str());
+			y = std::atoi(parsed[1].c_str());
+			player = std::atoi(parsed[2].c_str());
 			board(x, y, player);
 		}
 	}

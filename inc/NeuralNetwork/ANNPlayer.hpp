@@ -24,12 +24,14 @@ class NeuralNetwork::ANNPlayer {
 public:
 	ANNPlayer(const std::string &modelFile)
 		: _file(modelFile, std::ios::in),
-		  _layer1(file, 2, 4, 5, 2, [this](float x) {return selu(x);}),
-		  _layer2(file, 4, 4, 5, 2, [this](float x) {return selu(x);}),
-		  _layer3(file, 4, 8, 3, 1, [this](float x) {return selu(x);}),
-		  _layer4(file, 8, 8, 3, 1, [this](float x) {return selu(x);}),
-		  _out(file, 8, 1, 1, 0, [this](float x) {return selu(x);}),
+		  _layer1(_file, 2, 4, 5, 2, [this](float x) {return selu(x);}),
+		  _layer2(_file, 4, 4, 5, 2, [this](float x) {return selu(x);}),
+		  _layer3(_file, 4, 8, 3, 1, [this](float x) {return selu(x);}),
+		  _layer4(_file, 8, 8, 3, 1, [this](float x) {return selu(x);}),
+		  _out(_file, 8, 1, 1, 0, [this](float x) {return selu(x);})
 		{
+			if (!_file.is_open())
+				std::exit(0);
 			_file.close();
 		};
 
@@ -46,7 +48,7 @@ public:
 	}
 
 private:
-	inline T elu(T x, U alpha=1.67326) const noexcept {
+	inline T elu(T x, T alpha=1.67326) const noexcept {
 		return (x < T() ? (alpha * (std::exp(x) - 1)) : x);
 	}
 
@@ -56,7 +58,7 @@ private:
 
 	std::pair<uint32_t, uint32_t> argmax
 	(const NeuralNetwork::Conv2DMatrix<T> &output,
-	 cosnt NeuralNetwork::PossibleActions &possibleActions) const noexcept {
+	 const NeuralNetwork::PossibleActions &possibleActions) const noexcept {
 		auto height = output.size();
 		auto width = output[0].size();
 		uint32_t x = 0u;

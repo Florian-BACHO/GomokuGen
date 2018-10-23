@@ -7,7 +7,10 @@
 
 #pragma once
 
+#include <iostream>
+#include <vector>
 #include <cstdlib>
+#include <Windows.h>
 #include "NeuralNetwork/ANNPlayer.hpp"
 #include "AGameCommunication.hpp"
 
@@ -30,7 +33,7 @@ public:
 	void start(uint32_t size) override {
 		_size = size;
 		resetBoard();
-		std::cout << "OK" << std:endl;
+		std::cout << "OK" << std::endl;
 	}
 
 	void turn(uint32_t x, uint32_t y) override {
@@ -40,7 +43,7 @@ public:
 		_board[y][x][1] = 1.0f;
 		possibleActions = getPossibleActions();
 		action = _player(_board, possibleActions);
-		_board[action.second][action.first] = 1.0f;
+		_board[action.second][action.first][0] = 1.0f;
 		std::cout << action.first << "," << action.second << std::endl;
 	}
 
@@ -59,8 +62,8 @@ public:
 	}
 
 	void about() override {
-		std::cout << "name=\"ConvANN\", version=\"1.0\", " +
-			"author=\"Nymand\", ""country=\"USA\"" << std::endl;
+		std::cout << std::string("name=\"ConvANN\", version=\"1.0\", ") +
+			"author=\"Nymand\", \"country=\"USA\"" << std::endl;
 	}
 
 private:
@@ -77,8 +80,16 @@ private:
 		return (out);
 	}
 
+	template <typename T>
+	NeuralNetwork::Conv2DMatrix<T> getZerosMatrix(uint32_t width, uint32_t height,
+		uint32_t channel) {
+		std::vector<T> zeroChannel(channel, 0.0f);
+		std::vector<std::vector<T>> zeroRow(width, zeroChannel);
+		return (NeuralNetwork::Conv2DMatrix<T>(height, zeroRow));
+	}
+
 private:
 	Board _board;
-	uint32_t size;
+	uint32_t _size;
 	NeuralNetwork::ANNPlayer<float> _player;
 };
