@@ -35,7 +35,7 @@ with tf.Session() as sess:
     res = ann(np.zeros((1, 20, 20, 2)))
     print(res)
 
-    file = open("out.model", "w")
+    file = open("ann.model", "w")
 
     for name in LAYERS:
         kernel, bias = getKernelAndBias(sess, SCOPE + "/" + name)
