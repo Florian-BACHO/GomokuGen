@@ -32,14 +32,10 @@ saver = tf.train.Saver()
 with tf.Session() as sess:
     saver.restore(sess, "save/model.ckpt")
 
-    res = ann(np.zeros((1, 20, 20, 2)))
-    print(res)
-
     file = open("ann.model", "w")
 
     for name in LAYERS:
         kernel, bias = getKernelAndBias(sess, SCOPE + "/" + name)
-        print(len(kernel))
         writeKernelAndBias(file, kernel, bias)
 
     file.close()
