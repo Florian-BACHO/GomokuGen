@@ -42,9 +42,9 @@ public:
 		NeuralNetwork::PossibleActions possibleActions;
 		std::pair<uint32_t, uint32_t> action;
 
+		_board[y][x][1] = 1.0f;
 		if (checkComplete())
 			return;
-		_board[y][x][1] = 1.0f;
 		possibleActions = getPossibleActions();
 		action = _player(_board, possibleActions);
 		_board[action.second][action.first][0] = 1.0f;
@@ -86,6 +86,10 @@ private:
 		return (gen(rng));
 	}
 
+	inline bool isEmpty(uint32_t x, uint32_t y) const noexcept {
+		return (_board[y][x][0] == 0.0f && _board[y][x][1] == 0.0f);
+	}
+
 	NeuralNetwork::PossibleActions getPossibleActions() const noexcept {
 		std::vector<std::pair<uint32_t, uint32_t>> out;
 		auto height = _size;
@@ -93,8 +97,7 @@ private:
 
 		for (auto y = 0u; y < height; y++)
 			for (auto x = 0u; x < width; x++)
-				if (_board[y][x][0] == 0.0f &&
-				    _board[y][x][1] == 0.0f)
+				if (isEmpty(x, y))
 					out.push_back(std::make_pair(x, y));
 		return (out);
 	}
@@ -107,9 +110,8 @@ private:
 		return (NeuralNetwork::Conv2DMatrix<T>(height, zeroRow));
 	}
 
-	bool playIfEmpty(uint32_t x, uint32_t y) const noexcept{
-		if (x >= _size || y >= _size || _board[y][x][0] == 1.0f || 
-			_board[y][x][1] == 1.0f)
+	bool playIfEmpty(uint32_t x, uint32_t y) const noexcept {
+		if (x >= _size || y >= _size || !isEmpty(x, y))
 			return false;
 		std::cout << x << "," << y << std::endl;
 		return true;
@@ -128,61 +130,100 @@ private:
 
 	bool checkVertical(uint32_t x, uint32_t y) const noexcept {
 		uint32_t counter = 0;
+		int32_t xTarget = -1;
+		int32_t yTarget = -1;
 
 		for (auto y2 = y; y2 < y + 5; y2++) {
-			if (y2 >= _size || _board[y2][x][0] != 1.0f)
+			if (y2 >= _size)
 				break;
-			counter++;
+			if (isEmpty(x, y2) && xTarget == -1) {
+				xTarget = x;
+				yTarget = y2;
+			} else if ((isEmpty(x, y2) && xTarget != -1) || _board[y2][x][1] == 1.0f)
+				break;
+			else
+				counter++;
 		}
-		if (counter == 5)
-			return (playIfEmpty(x, y -  1) ||
-					playIfEmpty(x, y + 4));
+		if (counter == 4 && xTarget != -1) {
+			std::cout << xTarget << "," << yTarget << std::endl;
+			return true;
+		}
 		return false;
 	}
 
 	bool checkHorizontal(uint32_t x, uint32_t y) const noexcept {
 		uint32_t counter = 0;
+		int32_t xTarget = -1;
+		int32_t yTarget = -1;
 
 		for (auto x2 = x; x2 < x + 5; x2++) {
-			if (x2 >= _size || _board[y][x2][0] != 1.0f)
+			if (x2 >= _size)
 				break;
-			counter++;
+			if (isEmpty(x2, y) && xTarget == -1) {
+				xTarget = x2;
+				yTarget = y;
+			}
+			else if ((isEmpty(x2, y) && xTarget != -1) || _board[y][x2][1] == 1.0f)
+				break;
+			else
+				counter++;
 		}
-		if (counter == 5)
-			return (playIfEmpty(x - 1, y) ||
-				playIfEmpty(x + 4, y));
+		if (counter == 4 && xTarget != -1) {
+			std::cout << xTarget << "," << yTarget << std::endl;
+			return true;
+		}
 		return false;
 	}
 
 	bool checkDiagRight(uint32_t x, uint32_t y) const noexcept {
 		uint32_t counter = 0;
 		auto y2 = y;
+		int32_t xTarget = -1;
+		int32_t yTarget = -1;
 
 		for (auto x2 = x; x2 < x + 5; x2++) {
-			if (x2 >= _size || y2 >= _size ||_board[y2][x2][0] != 1.0f)
+			if (x2 >= _size || y2 >= _size)
 				break;
-			counter++;
+			if (isEmpty(x2, y2) && xTarget == -1) {
+				xTarget = x2;
+				yTarget = y2;
+			}
+			else if ((isEmpty(x2, y2) && xTarget != -1) || _board[y2][x2][1] == 1.0f)
+				break;
+			else
+				counter++;
 			y2--;
 		}
-		if (counter == 5)
-			return (playIfEmpty(x + 4, y - 1) ||
-				playIfEmpty(x - 1, y + 4));
+		if (counter == 4 && xTarget != -1) {
+			std::cout << xTarget << "," << yTarget << std::endl;
+			return true;
+		}
 		return false;
 	}
 
 	bool checkDiagLeft(uint32_t x, uint32_t y) const noexcept {
 		uint32_t counter = 0;
 		auto y2 = y;
+		int32_t xTarget = -1;
+		int32_t yTarget = -1;
 
 		for (auto x2 = x; x2 < x + 5; x2++) {
-			if (x2 >= _size || y2 >= _size || _board[y2][x2][0] != 1.0f)
+			if (x2 >= _size || y2 >= _size)
 				break;
-			counter++;
+			if (isEmpty(x2, y2) && xTarget == -1) {
+				xTarget = x2;
+				yTarget = y2;
+			}
+			else if ((isEmpty(x2, y2) && xTarget != -1) || _board[y2][x2][1] == 1.0f)
+				break;
+			else
+				counter++;
 			y2++;
 		}
-		if (counter == 5)
-			return (playIfEmpty(x - 1, y - 1) ||
-				playIfEmpty(x + 4, y + 4));
+		if (counter == 4 && xTarget != -1) {
+			std::cout << xTarget << "," << yTarget << std::endl;
+			return true;
+		}
 		return false;
 	}
 
